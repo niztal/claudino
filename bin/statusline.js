@@ -61,16 +61,23 @@ function limitSegment(data, animate) {
 // Cumulative output tokens for the whole session, summed from the transcript.
 // Read incrementally (only the bytes appended since last time) and cached by
 // byte offset in the state file, so it stays cheap even for large transcripts.
+// One API response is written as several "assistant" lines (one per content
+// block), each repeating the same usage — count each message.id only once.
 function cumulativeOutput(data, sessionId, fallback) {
   const tpath = data.transcript_path;
   if (!tpath) return fallback;
   const st = state.read(sessionId) || {};
-  let offset = st.tokPath === tpath && typeof st.tokOffset === 'number' ? st.tokOffset : 0;
-  let total = st.tokPath === tpath && typeof st.cumTok === 'number' ? st.cumTok : 0;
+  // tokV guards the cache format: totals counted before the per-message dedupe
+  // (no tokV) are inflated, so throw them away and recount once.
+  const fresh = st.tokPath === tpath && st.tokV === 2;
+  let offset = fresh && typeof st.tokOffset === 'number' ? st.tokOffset : 0;
+  let total = fresh && typeof st.cumTok === 'number' ? st.cumTok : 0;
+  let lastId = fresh ? st.tokMsgId : undefined;
+  let lastOt = fresh && typeof st.tokMsgOt === 'number' ? st.tokMsgOt : 0;
 
   let size;
   try { size = fs.statSync(tpath).size; } catch { return total || fallback; }
-  if (size < offset) { offset = 0; total = 0; } // file was truncated/rotated
+  if (size < offset) { offset = 0; total = 0; lastId = undefined; lastOt = 0; } // file was truncated/rotated
   if (size <= offset) return total || fallback;
 
   try {
@@ -87,12 +94,21 @@ function cumulativeOutput(data, sessionId, fallback) {
       if (!line) continue;
       try {
         const o = JSON.parse(line);
-        const ot = o && o.type === 'assistant' && o.message && o.message.usage && o.message.usage.output_tokens;
-        if (typeof ot === 'number') total += ot;
+        const m = o && o.type === 'assistant' && o.message;
+        const ot = m && m.usage && m.usage.output_tokens;
+        if (typeof ot === 'number') {
+          if (m.id && m.id === lastId) {
+            total += ot - lastOt; // same response, refreshed usage — replace, don't re-add
+          } else {
+            total += ot;
+            lastId = m.id;
+          }
+          lastOt = ot;
+        }
       } catch { /* skip non-JSON / partial lines */ }
     }
     offset += len - Buffer.byteLength(partial, 'utf8');
-    state.write(sessionId, { cumTok: total, tokOffset: offset, tokPath: tpath });
+    state.write(sessionId, { cumTok: total, tokOffset: offset, tokPath: tpath, tokMsgId: lastId, tokMsgOt: lastOt, tokV: 2 });
   } catch { /* ignore read errors, return what we have */ }
 
   return total || fallback;
