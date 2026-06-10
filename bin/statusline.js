@@ -139,15 +139,19 @@ function render(data) {
   const totalTok = cumulativeOutput(data, sessionId, outTok);
   const tokStr = totalTok > 0 ? R.gold('↓ ' + kfmt(totalTok) + ' tok') + R.gray(' this session') : '';
 
+  // The model Claude is currently running as, e.g. "Opus 4.8".
+  const model = (data.model || {}).display_name || '';
+  const modelStr = model ? R.gray(' · ') + R.dim(model) : '';
+
   let right0;
   if (thinking) {
-    const reserve = tokStr ? 26 : 0;
+    const reserve = (tokStr ? 26 : 0) + (model ? model.length + 3 : 0);
     const room = cols - claude.WIDTH - 4 - reserve;
     const coinCount = Math.max(3, Math.min(24, Math.floor(room / 2)));
     const offset = Math.floor(Date.now() / 450); // scroll the tokens toward Claude
-    right0 = R.coinTrail(coinCount, offset) + (tokStr ? '  ' + tokStr : '');
+    right0 = R.coinTrail(coinCount, offset) + (tokStr ? '  ' + tokStr : '') + modelStr;
   } else {
-    right0 = R.dim('z z z   Claude is napping…') + (tokStr ? R.gray('   ') + tokStr : '');
+    right0 = R.dim('z z z   Claude is napping…') + (tokStr ? R.gray('   ') + tokStr : '') + modelStr;
   }
 
   const gap = '  ';
@@ -172,6 +176,7 @@ async function demo() {
   out.write('\x1b[?1049h\x1b[?25l'); // alt screen, hide cursor
   const sample = {
     session_id: 'demo',
+    model: { id: 'claude-opus-4-8', display_name: 'Opus 4.8' },
     context_window: { total_output_tokens: 0, used_percentage: 18 },
     cost: { total_cost_usd: 0 },
   };

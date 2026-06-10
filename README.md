@@ -14,7 +14,7 @@ While Claude is thinking, the creature walks and the coin trail scrolls toward
 it:
 
 ```
- ▐▛███▜▌   ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ● ●  ↓ 1.2k tok this session
+ ▐▛███▜▌   ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ●  ↓ 1.2k tok this session · Opus 4.8
 ▝▜█████▛▘  Context ▓▓▓░░░░░░░ 28%
   ▘▘ ▝▝    Limit   ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
 ```
@@ -22,7 +22,7 @@ it:
 When Claude is done, it naps:
 
 ```
- ▐▛███▜▌   z z z   Claude is napping…   ↓ 1.2k tok this session
+ ▐▛███▜▌   z z z   Claude is napping…   ↓ 1.2k tok this session · Opus 4.8
 ▝▜█████▛▘  Context ▓▓▓░░░░░░░ 28%
   ▘▘ ▝▝    Limit   ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
 ```
@@ -30,7 +30,8 @@ When Claude is done, it naps:
 Both bars fill up as you consume them and shift green → yellow → red near the
 cap; while thinking, a gold pulse travels through the Limit bar. The `↓ tok`
 odometer is the session's cumulative output tokens, summed live from the
-transcript. On API-key billing (no rate-limit data) the Limit row shows your
+transcript, and the trailing `· Opus 4.8` is the model Claude is currently
+running as. On API-key billing (no rate-limit data) the Limit row shows your
 estimated session cost instead, e.g. `Cost  ~$0.42 session (est.)`.
 
 ## How it works
