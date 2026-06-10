@@ -1,18 +1,37 @@
 # claudino 🦖
 
 **Play while Claude thinks.** `claudino` (Claude + Dino) turns the waiting time
-into something fun: the orange Claude mascot — rendered as real pixel art with
-half-block characters — lives in your Claude Code status line and **munches your
-tokens** (drawn as coins `¢ $`) while Claude is working. Its score is your *real*
-token usage and session cost.
+into something fun: the orange Claude creature — drawn with real block-art
+glyphs — lives in your Claude Code status line and **munches your tokens**
+(gold coins `●`, with a fat `◆` every fifth) while Claude is working. Below it,
+two live gauges show your *real* usage: **Context** (this chat's context
+window) and **Limit** (your 5-hour usage allowance, with its reset time).
 
 Want a real game? `/claudino:play` opens a full, keyboard-controlled game (a
 Dino-style **Coin Runner** + **Token Snake**) in a separate terminal pane.
 
+While Claude is thinking, the creature walks and the coin trail scrolls toward
+it:
+
 ```
- (•ᴥ•)  ¢ ¢ $ ¢ ¢ ¢ $ ¢ ¢
- belly ▓▓▓░░░░░░░ 28%   munching $0.0042 · 1,240 tok this turn
+ ▐▛███▜▌   ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ● ●  ↓ 1.2k tok this session
+▝▜█████▛▘  Context ▓▓▓░░░░░░░ 28%
+  ▘▘ ▝▝    Limit   ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
 ```
+
+When Claude is done, it naps:
+
+```
+ ▐▛███▜▌   z z z   Claude is napping…   ↓ 1.2k tok this session
+▝▜█████▛▘  Context ▓▓▓░░░░░░░ 28%
+  ▘▘ ▝▝    Limit   ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
+```
+
+Both bars fill up as you consume them and shift green → yellow → red near the
+cap; while thinking, a gold pulse travels through the Limit bar. The `↓ tok`
+odometer is the session's cumulative output tokens, summed live from the
+transcript. On API-key billing (no rate-limit data) the Limit row shows your
+estimated session cost instead, e.g. `Cost  ~$0.42 session (est.)`.
 
 ## How it works
 
@@ -22,8 +41,10 @@ display-only and refreshes about once per second, so the muncher is a charming
 idle pet, not an arcade game.
 
 - **Status-line muncher** (`bin/statusline.js`): reads Claude Code's status-line
-  JSON and animates the pixel-art mascot (`lib/sprite.js`) + a coin trail. Score
-  = live `context_window` tokens and `cost.total_cost_usd`.
+  JSON and animates the block-art creature (`lib/claude.js`) + a coin trail.
+  The gauges are real data: `context_window.used_percentage` (Context),
+  `rate_limits.five_hour` (Limit + reset countdown), and the token odometer is
+  summed incrementally from the session transcript.
 - **Hooks** (`hooks/hooks.json` → `bin/hook-state.js`): `UserPromptSubmit` marks
   "thinking", `Stop` marks "idle", so the creature runs while Claude works and
   naps when it's done. State is shared via a small per-`session_id` temp file.
@@ -57,7 +78,7 @@ the same thing as `/claudino:play`.
 ```
 node bin/statusline.js --demo                 # animated preview of the muncher
 node bin/tm-game.js                            # play the game right here
-echo '{"session_id":"t","context_window":{"total_output_tokens":1240,"used_percentage":28},"cost":{"total_cost_usd":0.0042}}' | COLUMNS=80 node bin/statusline.js
+echo '{"session_id":"t","context_window":{"total_output_tokens":1240,"used_percentage":28},"cost":{"total_cost_usd":0.0042},"rate_limits":{"five_hour":{"used_percentage":62,"resets_at":'$(($(date +%s)+7200))'}}}' | COLUMNS=80 node bin/statusline.js
 ```
 
 ## Controls (game)
