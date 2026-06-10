@@ -1,0 +1,18 @@
+{
+  "name": "claudino",
+  "version": "0.1.0",
+  "description": "Play while Claude thinks — the orange Claude creature munches your tokens in the status line, plus a full keyboard game.",
+  "bin": {
+    "claudino": "bin/tm-install.js"
+  },
+  "scripts": {
+    "statusline": "node bin/statusline.js",
+    "game": "node bin/tm-game.js",
+    "demo": "node bin/statusline.js --demo"
+  },
+  "keywords": ["claude-code", "claude-code-plugin", "statusline", "game", "dino"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  }
+}

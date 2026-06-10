@@ -1,0 +1,13 @@
+{
+  "name": "claudino",
+  "owner": {
+    "name": "claudino"
+  },
+  "plugins": [
+    {
+      "name": "claudino",
+      "source": "./",
+      "description": "Play while Claude thinks — a token-munching status-line pet + a full keyboard game."
+    }
+  ]
+}

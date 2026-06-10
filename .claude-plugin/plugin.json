@@ -1,0 +1,8 @@
+{
+  "name": "claudino",
+  "description": "Play while Claude thinks. The orange Claude creature munches your tokens (as coins) in the status line while Claude works, plus a full keyboard game in a side pane via /claudino:play.",
+  "version": "0.1.0",
+  "author": {
+    "name": "claudino"
+  }
+}
