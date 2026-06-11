@@ -7,9 +7,9 @@
 //            Tab or G switch game · Q or Ctrl-C quit
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 const R = require('../lib/render');
+const state = require('../lib/state');
 
 const GAMES = [
   require('../lib/games/runner'),
@@ -26,9 +26,69 @@ let gameIndex = 0;
 let game = null;
 let paused = false;
 let timer = null;
+let claudeTimer = null;
+
+// Claude watcher: the hooks flip a per-session phase in the shared state dir
+// (lib/state.js), and the game runs in its own pane with no session id of its
+// own — so poll every state file once a second. When any session goes
+// thinking -> idle, flash a "your turn" banner so finishing a game isn't the
+// only way to notice Claude is waiting on you.
+const BANNER_MS = 10000;
+let phases = null; // file -> phase from the previous poll (null = first poll)
+let bannerUntil = 0;
+let anyThinking = false;
+
+function pollClaude() {
+  let files = [];
+  try {
+    files = fs.readdirSync(state.DIR).filter((f) => f.endsWith('.json') && f !== 'hiscore.json');
+  } catch { files = []; }
+  const next = {};
+  let thinking = false;
+  for (const f of files) {
+    let phase;
+    try { phase = (JSON.parse(fs.readFileSync(path.join(state.DIR, f), 'utf8')) || {}).phase; } catch { continue; }
+    if (!phase) continue;
+    next[f] = phase;
+    if (phase === 'thinking') thinking = true;
+    if (phases && phases[f] === 'thinking' && phase === 'idle') bannerUntil = Date.now() + BANNER_MS;
+  }
+  phases = next;
+  anyThinking = thinking;
+}
+
+function claudeNote() {
+  if (Date.now() < bannerUntil) {
+    const lit = Math.floor(Date.now() / 400) % 2 === 0; // gentle blink
+    const msg = ' Claude is done — your turn!';
+    return lit ? R.bold(R.gold('★' + msg)) : R.gold('☆' + msg);
+  }
+  if (anyThinking) return R.dim('● Claude is thinking…');
+  return '';
+}
+
+// Advertise that a game is already running so the auto-launch hook
+// (bin/hook-state.js) doesn't open a second pane. The reader checks the PID is
+// still alive before trusting the file, so a crash leaving it behind is fine.
+// A clean quit also records when, so auto-launch doesn't instantly reopen a
+// pane the user just closed on purpose.
+const PID_FILE = path.join(state.DIR, 'game.pid');
+const QUIT_FILE = path.join(state.DIR, 'game.quit');
+function writePidFile() {
+  try {
+    fs.mkdirSync(state.DIR, { recursive: true });
+    fs.writeFileSync(PID_FILE, String(process.pid));
+  } catch {}
+}
+function markQuit() {
+  try {
+    if (fs.readFileSync(PID_FILE, 'utf8').trim() === String(process.pid)) fs.unlinkSync(PID_FILE);
+    fs.writeFileSync(QUIT_FILE, String(Date.now()));
+  } catch {}
+}
 
 // Persisted high score, per game.
-const HI_FILE = path.join(os.tmpdir(), 'claudino', 'hiscore.json');
+const HI_FILE = path.join(state.DIR, 'hiscore.json');
 let hi = (() => { try { return JSON.parse(fs.readFileSync(HI_FILE, 'utf8')); } catch { return {}; } })();
 const best = () => hi[game.title] || 0;
 function recordBest() {
@@ -104,11 +164,13 @@ end tell`;
 
 function leave() {
   if (timer) clearInterval(timer);
+  if (claudeTimer) clearInterval(claudeTimer);
   if (process.stdin.isTTY) {
     try { process.stdin.setRawMode(false); } catch (e) {}
   }
   out.write('\x1b[?25h');   // show cursor
   out.write('\x1b[?1049l'); // restore screen
+  markQuit();
   closeOwnWindow();
   process.exit(0);
 }
@@ -126,7 +188,7 @@ function draw() {
     R.coin(true) + ' ' + R.bold(R.gold('TOKENS ' + R.thousands(game.score || 0))) +
     R.gray('   HI ' + R.thousands(best()));
   buf += '\x1b[K' + spread(left, right, cols) + '\n';
-  buf += '\x1b[K' + R.dim(game.status()) + '\n';
+  buf += '\x1b[K' + spread(R.dim(game.status()), claudeNote(), cols) + '\n';
 
   for (const line of lines) buf += '\x1b[K' + line + '\n';
 
@@ -172,6 +234,7 @@ function handle(key) {
 
 function main() {
   enter();
+  writePidFile();
   newGame(gameIndex);
 
   process.stdin.on('data', (chunk) => {
@@ -194,6 +257,8 @@ function main() {
   process.on('SIGINT', leave);
   process.on('SIGTERM', leave);
 
+  pollClaude(); // baseline poll: records current phases without bannering
+  claudeTimer = setInterval(pollClaude, 1000);
   timer = setInterval(loop, FRAME_MS);
   draw();
 }
