@@ -32,8 +32,10 @@ function num(v, d = 0) {
 
 function fmtReset(sec) {
   if (sec < 60) return '<1m';
-  const h = Math.floor(sec / 3600);
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
   const m = Math.floor((sec % 3600) / 60);
+  if (d > 0) return d + 'd ' + h + 'h';
   return h > 0 ? h + 'h ' + m + 'm' : m + 'm';
 }
 
@@ -43,19 +45,27 @@ function kfmt(n) {
   return String(Math.round(n));
 }
 
-// The 5-hour usage window as a "% used" bar (Pro/Max only, after the first API
+// The usage allowance as a "% used" bar (Pro/Max only, after the first API
 // response), consistent with the Context bar: fills up as you consume it, reds
-// out near the cap. Returns null when no rate-limit data is available.
+// out near the cap. Claude Code reports two rolling windows — 5-hour and
+// 7-day — so show whichever is closer to its cap, labeled with its window
+// (ties go to 5h). Returns null when no rate-limit data is available.
 // `animate` adds the gold pulse (thinking only).
 function limitSegment(data, animate) {
-  const fh = (data.rate_limits || {}).five_hour;
-  if (!fh || typeof fh.used_percentage !== 'number') return null;
-  const used = Math.max(0, Math.min(100, fh.used_percentage));
+  const rl = data.rate_limits || {};
+  const windows = [
+    { label: 'Limit·5h', w: rl.five_hour },
+    { label: 'Limit·7d', w: rl.seven_day },
+  ].filter((x) => x.w && typeof x.w.used_percentage === 'number');
+  if (!windows.length) return null;
+  windows.sort((a, b) => b.w.used_percentage - a.w.used_percentage);
+  const pick = windows[0];
+  const used = Math.max(0, Math.min(100, pick.w.used_percentage));
   // Only show a reset time when it's genuinely in the future; a past/zero
   // timestamp (window at its boundary or briefly stale) shouldn't say "now".
-  const remaining = typeof fh.resets_at === 'number' ? fh.resets_at - Date.now() / 1000 : 0;
+  const remaining = typeof pick.w.resets_at === 'number' ? pick.w.resets_at - Date.now() / 1000 : 0;
   const reset = remaining > 0 ? R.gray(' · resets ') + fmtReset(remaining) : '';
-  return R.bar(used, 10, animate) + ' ' + R.dim(Math.round(used) + '%') + reset;
+  return { label: pick.label, seg: R.bar(used, 10, animate) + ' ' + R.dim(Math.round(used) + '%') + reset };
 }
 
 // Cumulative output tokens for the whole session, summed from the transcript.
@@ -133,17 +143,19 @@ function render(data) {
   // Pulse the limit bar only while thinking — when napping, nothing should move.
   const limit = limitSegment(data, thinking); // null for API-key users / before first response
 
-  // Labels padded to a common width so the two bars line up vertically.
-  const label = (s) => R.gray(s.padEnd(8));
+  // Labels padded to a common width so the two bars line up vertically
+  // ("Limit·5h" is the longest at 8 chars, plus a separating space).
+  const label = (s) => R.gray(s.padEnd(9));
 
   // Both bars mean the same thing now: filled = USED, green -> red near the cap.
   // L1 "Context" = this chat's context window.
   const contextLine = label('Context') + R.bar(ctxPct, 10) + ' ' + R.dim(Math.round(ctxPct) + '%');
 
-  // L2 "Limit" = your 5-hour usage allowance (or session cost for API users).
+  // L2 "Limit" = the tighter of your 5-hour / 7-day usage allowances (or
+  // session cost for API users).
   let limitLine;
   if (limit) {
-    limitLine = label('Limit') + limit;
+    limitLine = label(limit.label) + limit.seg;
   } else if (cost > 0) {
     limitLine = label('Cost') + R.gray('~') + R.gold('$' + cost.toFixed(2)) + R.gray(' session (est.)');
   } else {
