@@ -1,5 +1,9 @@
 # claudino 🦖
 
+[![Star claudino on GitHub](https://img.shields.io/github/stars/niztal/claudino?style=social)](https://github.com/niztal/claudino)
+
+> Enjoying claudino? [⭐ Star it on GitHub](https://github.com/niztal/claudino) — it helps others find it.
+
 **Play while Claude thinks.** `claudino` (Claude + Dino) turns the waiting time
 into something fun: the orange Claude creature — drawn with real block-art
 glyphs — lives in your Claude Code status line and **munches your tokens**
@@ -61,20 +65,25 @@ idle pet, not an arcade game.
 
 ## Install
 
+### One-line install (recommended)
+```
+npx github:niztal/claudino install
+```
+That's it — it copies the scripts to `~/.claude/claudino` and wires up the
+`statusLine`, hooks and the `/play` command (your settings are backed up
+first). To remove it:
+```
+npx github:niztal/claudino uninstall
+```
+
 ### As a Claude Code plugin
 ```
-/plugin marketplace add <owner>/claudino
+/plugin marketplace add niztal/claudino
 /plugin install claudino@claudino
 /claudino:setup
 ```
 `/claudino:setup` writes the `statusLine` block into `~/.claude/settings.json`
 (with a backup). The thinking/idle hooks ship with the plugin automatically.
-
-### As a one-line CLI
-```
-npx claudino install      # copies scripts + wires statusLine, hooks & /play
-npx claudino uninstall    # reverts (settings are backed up first)
-```
 
 Install also drops a standalone `~/.claude/commands/play.md`, so when Claude is
 idle you can just type **`/play`** to open the game (it launches in a separate

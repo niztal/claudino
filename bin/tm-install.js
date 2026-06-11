@@ -2,9 +2,11 @@
 'use strict';
 // claudino installer / configurator.
 //
-//   npx claudino install      Copy scripts to ~/.claude/claudino and wire up
+//   npx github:niztal/claudino install
+//                             Copy scripts to ~/.claude/claudino and wire up
 //                             the statusLine + hooks in ~/.claude/settings.json.
-//   npx claudino uninstall    Remove claudino's settings entries and files.
+//   npx github:niztal/claudino uninstall
+//                             Remove claudino's settings entries and files.
 //   node tm-install.js link <pluginRoot>
 //                             Point the statusLine at an already-installed
 //                             plugin dir (hooks come from the plugin itself).

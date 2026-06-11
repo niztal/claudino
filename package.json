@@ -2,6 +2,11 @@
   "name": "claudino",
   "version": "0.1.0",
   "description": "Play while Claude thinks — the orange Claude creature munches your tokens in the status line, plus a full keyboard game.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niztal/claudino.git"
+  },
+  "homepage": "https://github.com/niztal/claudino#readme",
   "bin": {
     "claudino": "bin/tm-install.js"
   },
