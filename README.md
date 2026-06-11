@@ -5,30 +5,35 @@ into something fun: the orange Claude creature — drawn with real block-art
 glyphs — lives in your Claude Code status line and **munches your tokens**
 (gold coins `●`, with a fat `◆` every fifth) while Claude is working. Below it,
 two live gauges show your *real* usage: **Context** (this chat's context
-window) and **Limit** (your 5-hour usage allowance, with its reset time).
+window) and **Limit** (whichever of your 5-hour / 7-day usage allowances is
+closer to its cap, with its reset time).
 
 Want a real game? `/claudino:play` opens a full, keyboard-controlled game (a
 Dino-style **Coin Runner** + **Token Snake**) in a separate terminal pane.
+While you play, the HUD shows when Claude is thinking — and flashes
+`★ Claude is done — your turn!` the moment it finishes, so you never miss it.
 
 While Claude is thinking, the creature walks and the coin trail scrolls toward
 it:
 
 ```
  ▐▛███▜▌   ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ●  ↓ 1.2k tok this session · Opus 4.8
-▝▜█████▛▘  Context ▓▓▓░░░░░░░ 28%
-  ▘▘ ▝▝    Limit   ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
+▝▜█████▛▘  Context  ▓▓▓░░░░░░░ 28%
+  ▘▘ ▝▝    Limit·5h ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
 ```
 
 When Claude is done, it naps:
 
 ```
  ▐▛███▜▌   z z z   Claude is napping…   ↓ 1.2k tok this session · Opus 4.8
-▝▜█████▛▘  Context ▓▓▓░░░░░░░ 28%
-  ▘▘ ▝▝    Limit   ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
+▝▜█████▛▘  Context  ▓▓▓░░░░░░░ 28%
+  ▘▘ ▝▝    Limit·5h ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
 ```
 
 Both bars fill up as you consume them and shift green → yellow → red near the
-cap; while thinking, a gold pulse travels through the Limit bar. The `↓ tok`
+cap; while thinking, a gold pulse travels through the Limit bar. The Limit row
+tracks both rolling windows Claude Code reports (5-hour and 7-day) and shows
+whichever is more constrained — `Limit·5h` or `Limit·7d`. The `↓ tok`
 odometer is the session's cumulative output tokens, summed live from the
 transcript, and the trailing `· Opus 4.8` is the model Claude is currently
 running as. On API-key billing (no rate-limit data) the Limit row shows your
@@ -44,14 +49,15 @@ idle pet, not an arcade game.
 - **Status-line muncher** (`bin/statusline.js`): reads Claude Code's status-line
   JSON and animates the block-art creature (`lib/claude.js`) + a coin trail.
   The gauges are real data: `context_window.used_percentage` (Context),
-  `rate_limits.five_hour` (Limit + reset countdown), and the token odometer is
-  summed incrementally from the session transcript.
+  `rate_limits.five_hour` / `seven_day` (Limit + reset countdown), and the
+  token odometer is summed incrementally from the session transcript.
 - **Hooks** (`hooks/hooks.json` → `bin/hook-state.js`): `UserPromptSubmit` marks
   "thinking", `Stop` marks "idle", so the creature runs while Claude works and
   naps when it's done. State is shared via a small per-`session_id` temp file.
 - **Interactive game** (`bin/tm-game.js`): a standalone TUI with its own TTY, so
   it gets real keyboard input at full framerate. Launched into a side pane by
-  `bin/tm-play.sh`.
+  `bin/tm-play.sh`. It watches the same shared state, so the HUD flashes a
+  "your turn" banner when Claude finishes thinking in any session.
 
 ## Install
 
