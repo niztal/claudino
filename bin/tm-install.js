@@ -100,7 +100,7 @@ function writePlayCommand(root) {
     '```bash\n' +
     'bash "' + launcher + '"\n' +
     '```\n\n' +
-    'Then tell the user the controls: arrows/WASD move, Space jump, Tab swap game, ' +
+    'Then tell the user the controls: arrows/WASD move, Space jump, ' +
     'P pause, R restart, Q quit. If the launcher prints a manual command (no tmux / ' +
     'non-macOS), relay it.\n';
   fs.mkdirSync(path.dirname(PLAY_CMD), { recursive: true });

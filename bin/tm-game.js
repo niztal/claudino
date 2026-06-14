@@ -3,8 +3,8 @@
 // Layer 2 — the playable game. Runs in its own terminal (its own TTY), so it
 // gets real keyboard input and full framerate, unlike the status line.
 //
-// Controls:  arrows / WASD move · Space jump (runner) · P pause · R restart
-//            Tab or G switch game · Q or Ctrl-C quit
+// Controls:  arrows / WASD move · Space jump · P pause · R restart
+//            Q or Ctrl-C quit
 
 const fs = require('fs');
 const path = require('path');
@@ -13,7 +13,6 @@ const state = require('../lib/state');
 
 const GAMES = [
   require('../lib/games/runner'),
-  require('../lib/games/snake'),
 ];
 
 const FRAME_MS = 60;
@@ -194,7 +193,7 @@ function draw() {
 
   buf +=
     '\x1b[K' +
-    R.dim('space jump · [p]ause · [r]estart · [tab] swap game · [q]uit') +
+    R.dim('space jump · [p]ause · [r]estart · [q]uit') +
     SYNC_OFF;
   out.write(buf);
 }
@@ -209,12 +208,6 @@ function handle(key) {
   // control keys ('\x03' = Ctrl-C in raw mode)
   if (key === '\x03' || key === 'q' || key === 'Q') return leave();
   if (key === 'p' || key === 'P') { paused = !paused; return; }
-  if (key === '\t' || key === 'g' || key === 'G') {
-    gameIndex = (gameIndex + 1) % GAMES.length;
-    newGame(gameIndex);
-    paused = false;
-    return;
-  }
   if (key === 'r' || key === 'R') { game.input('restart'); return; }
 
   // arrow keys arrive as escape sequences: ESC [ A/B/C/D

@@ -12,10 +12,10 @@ two live gauges show your *real* usage: **Context** (this chat's context
 window) and **Limit** (whichever of your 5-hour / 7-day usage allowances is
 closer to its cap, with its reset time).
 
-Want a real game? `/claudino:play` opens a full, keyboard-controlled game (a
-Dino-style **Coin Runner** + **Token Snake**) in a separate terminal pane.
-While you play, the HUD shows when Claude is thinking — and flashes
-`★ Claude is done — your turn!` the moment it finishes, so you never miss it.
+Want a real game? `/claudino:play` opens a full, keyboard-controlled
+Dino-style **Coin Runner** in a separate terminal pane. While you play, the HUD
+shows when Claude is thinking — and flashes `★ Claude is done — your turn!` the
+moment it finishes, so you never miss it.
 
 While Claude is thinking, the creature walks and the coin trail scrolls toward
 it:
@@ -24,7 +24,7 @@ it:
  ▐▛███▜▌   ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ●  ↓ 1.2k tok this session · Opus 4.8
 ▝▜█████▛▘  Context  ▓▓▓░░░░░░░ 28%
   ▘▘ ▝▝    Limit·5h ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
-           ★ Star me: https://github.com/niztal/claudino
+           ▶ Play: /play  ·  ★ Star me: https://github.com/niztal/claudino
 ```
 
 When Claude is done, it naps:
@@ -33,13 +33,15 @@ When Claude is done, it naps:
  ▐▛███▜▌   z z z   Claude is napping…   ↓ 1.2k tok this session · Opus 4.8
 ▝▜█████▛▘  Context  ▓▓▓░░░░░░░ 28%
   ▘▘ ▝▝    Limit·5h ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
-           ★ Star me: https://github.com/niztal/claudino
+           ▶ Play: /play  ·  ★ Star me: https://github.com/niztal/claudino
 ```
 
-The fourth row is a gentle **star nudge** with the repo URL. It's wrapped in an
-OSC 8 terminal hyperlink (clickable in iTerm2, VS Code, WezTerm, kitty, …), and
-because the bare URL is also shown as text, terminals that auto-linkify URLs —
-like Warp — make it clickable too.
+The fourth row is a static, two-part nudge: a `▶ /play` tip — the real,
+keyboard-controlled game is one command away while Claude works — and a **star
+nudge** with the repo URL. The star link is wrapped in an OSC 8 terminal
+hyperlink (clickable in iTerm2, VS Code, WezTerm, kitty, …), and because the
+bare URL is also shown as text, terminals that auto-linkify URLs — like Warp —
+make it clickable too.
 
 Both bars fill up as you consume them and shift green → yellow → red near the
 cap; while thinking, a gold pulse travels through the Limit bar. The Limit row
@@ -69,6 +71,19 @@ idle pet, not an arcade game.
   it gets real keyboard input at full framerate. Launched into a side pane by
   `bin/tm-play.sh`. It watches the same shared state, so the HUD flashes a
   "your turn" banner when Claude finishes thinking in any session.
+
+## The game — `/play`
+
+The status line is just an idle pet. For the real thing, type **`/play`** (or
+`/claudino:play`) any time Claude is idle and a full, keyboard-controlled game
+opens in a separate terminal pane — so you can play while Claude keeps working
+in the main one. The HUD shows when Claude is thinking and flashes
+`★ Claude is done — your turn!` the moment it finishes.
+
+**🦖 Coin Runner** — the Dino game. The orange Claude creature runs along the
+ground; tap `Space`/`↑` for a snappy hop to clear bombs and grab tokens (`●`,
+with a fat `◆` worth 5×). It speeds up the longer you survive, keeps score in
+tokens, and remembers your high score.
 
 ## Install
 
@@ -105,8 +120,7 @@ echo '{"session_id":"t","context_window":{"total_output_tokens":1240,"used_perce
 ```
 
 ## Controls (game)
-`arrows`/`WASD` move · `Space` jump (Coin Runner) · `Tab`/`G` switch game ·
-`P` pause · `R` restart · `Q`/`Ctrl-C` quit
+`arrows`/`WASD` move · `Space` jump · `P` pause · `R` restart · `Q`/`Ctrl-C` quit
 
 ## Notes & limits
 - The status-line animation is capped at ~1 fps (`refreshInterval` minimum).

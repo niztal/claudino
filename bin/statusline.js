@@ -183,19 +183,26 @@ function render(data) {
   }
 
   const gap = '  ';
-  // A 4th line below the muncher: a clickable "star me" nudge. We show the bare
-  // URL as visible text so terminals that auto-linkify URLs (Warp, iTerm2,
-  // Terminal.app, VS Code, …) make it clickable, AND wrap it in an OSC 8
-  // hyperlink for terminals that honour those. Aligned under the bars.
+  // A static 4th line below the muncher, aligned under the bars, carrying two
+  // gentle nudges side by side (both always shown — nothing flickers/switches):
+  //   • a "/play" tip — the status line is only an idle pet; the real,
+  //     keyboard-controlled game is one `/play` away.
+  //   • a clickable "star me" nudge. We show the bare URL as visible text so
+  //     terminals that auto-linkify URLs (Warp, iTerm2, Terminal.app, VS Code, …)
+  //     make it clickable, AND wrap it in an OSC 8 hyperlink for terminals that
+  //     honour those.
+  const indent = ' '.repeat(claude.WIDTH + 2);
   const STAR_URL = 'https://github.com/niztal/claudino';
   const link = (text) => '\x1b]8;;' + STAR_URL + '\x1b\\' + text + '\x1b]8;;\x1b\\';
-  const starLine = ' '.repeat(claude.WIDTH + 2) +
+  const nudgeLine = indent +
+    R.green('▶') + R.dim(' Play: ') + R.bold(R.blue('/play')) +
+    R.gray('  ·  ') +
     R.gold('★') + R.dim(' Star me: ') + link(R.blue(STAR_URL));
   return [
     art[0] + gap + right0,
     art[1] + gap + contextLine,
     art[2] + gap + limitLine,
-    starLine,
+    nudgeLine,
   ].join('\n');
 }
 

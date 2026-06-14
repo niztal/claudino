@@ -1,5 +1,5 @@
 ---
-description: Launch the claudino game — open the playable token-muncher game (Coin Runner / Token Snake) in a separate terminal pane so the user can play while Claude works. Use when the user asks to play claudino or open the game.
+description: Launch the claudino game — open the playable Coin Runner token-muncher game in a separate terminal pane so the user can play while Claude works. Use when the user asks to play claudino or open the game.
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/bin/tm-play.sh"
 If `$CLAUDE_PLUGIN_ROOT` is not set, locate this plugin's `bin/tm-play.sh` and
 run that absolute path instead.
 
-Then tell the user the controls: **arrows/WASD** to move, **Space** to jump
-(Coin Runner), **Tab** to switch games, **P** pause, **R** restart, **Q** quit.
-If the launcher printed a manual command (no tmux / non-macOS), relay it so they
-can start the game in their own second terminal.
+Then tell the user the controls: **arrows/WASD** to move, **Space** to jump,
+**P** pause, **R** restart, **Q** quit. If the launcher printed a manual command
+(no tmux / non-macOS), relay it so they can start the game in their own second
+terminal.
