@@ -4,6 +4,10 @@
 
 > Enjoying claudino? [⭐ Star it on GitHub](https://github.com/niztal/claudino) — it helps others find it.
 
+<p align="center">
+  <img src="media/claudino.gif" alt="claudino in action — the orange Claude creature munches your tokens in the Claude Code status line, naps when done, and opens a full Dino game with /play" width="640">
+</p>
+
 **Play while Claude thinks.** `claudino` (Claude + Dino) turns the waiting time
 into something fun: the orange Claude creature — drawn with real block-art
 glyphs — lives in your Claude Code status line and **munches your tokens**
