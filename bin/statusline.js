@@ -171,30 +171,31 @@ function render(data) {
   const model = (data.model || {}).display_name || '';
   const modelStr = model ? R.gray(' · ') + R.dim(model) : '';
 
-  // Gentle "star me" nudge on the top row (the surface where the token
-  // odometer lives). Width-guarded: shown only when the terminal is wide
-  // enough that it doesn't crowd the animation/odometer.
-  const vlen = (s) => s.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, '').length;
-  const starStr = R.gold('★') + R.dim(' star: github.com/niztal/claudino');
-  const starLen = vlen(starStr) + 3; // includes the separating gap
-
   let right0;
   if (thinking) {
-    const base = (tokStr ? 26 : 0) + (model ? model.length + 3 : 0);
-    // Only reserve room for the star if at least 3 coins still fit after it.
-    const showStar = cols - claude.WIDTH - 4 - base - starLen >= 6;
-    const room = cols - claude.WIDTH - 4 - base - (showStar ? starLen : 0);
+    const reserve = (tokStr ? 26 : 0) + (model ? model.length + 3 : 0);
+    const room = cols - claude.WIDTH - 4 - reserve;
     const coinCount = Math.max(3, Math.min(24, Math.floor(room / 2)));
     const offset = Math.floor(Date.now() / 450); // scroll the tokens toward Claude
-    right0 = R.coinTrail(coinCount, offset) + (tokStr ? '  ' + tokStr : '') + modelStr +
-      (showStar ? R.gray('   ') + starStr : '');
+    right0 = R.coinTrail(coinCount, offset) + (tokStr ? '  ' + tokStr : '') + modelStr;
   } else {
     right0 = R.dim('z z z   Claude is napping…') + (tokStr ? R.gray('   ') + tokStr : '') + modelStr;
-    if (cols - claude.WIDTH - 2 - vlen(right0) >= starLen) right0 += R.gray('   ') + starStr;
   }
 
   const gap = '  ';
-  return [art[0] + gap + right0, art[1] + gap + contextLine, art[2] + gap + limitLine].join('\n');
+  // A 4th line below the muncher: a clickable "star me" nudge. OSC 8 makes the
+  // text a real hyperlink in terminals that support it (iTerm2, VS Code, etc.);
+  // terminals that don't simply show the styled text. Aligned under the bars.
+  const STAR_URL = 'https://github.com/niztal/claudino';
+  const link = (text) => '\x1b]8;;' + STAR_URL + '\x1b\\' + text + '\x1b]8;;\x1b\\';
+  const starLine = ' '.repeat(claude.WIDTH + 2) +
+    link(R.gold('★') + R.dim(' Star claudino on GitHub'));
+  return [
+    art[0] + gap + right0,
+    art[1] + gap + contextLine,
+    art[2] + gap + limitLine,
+    starLine,
+  ].join('\n');
 }
 
 // --demo: animate a few frames so you can preview the muncher. Runs in the
