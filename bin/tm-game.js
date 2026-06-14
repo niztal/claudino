@@ -192,13 +192,9 @@ function draw() {
 
   for (const line of lines) buf += '\x1b[K' + line + '\n';
 
-  // Footer: controls on the left; if there's room, a gentle "star me" nudge on
-  // the right (the in-game surface where players actually see the project name).
-  const controls = R.dim('space jump · [p]ause · [r]estart · [tab] swap game · [q]uit');
-  const star = R.gold('★') + R.dim(' star: github.com/niztal/claudino');
   buf +=
     '\x1b[K' +
-    (cols >= 92 ? spread(controls, star, cols) : controls) +
+    R.dim('space jump · [p]ause · [r]estart · [tab] swap game · [q]uit') +
     SYNC_OFF;
   out.write(buf);
 }

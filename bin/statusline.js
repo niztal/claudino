@@ -171,15 +171,26 @@ function render(data) {
   const model = (data.model || {}).display_name || '';
   const modelStr = model ? R.gray(' · ') + R.dim(model) : '';
 
+  // Gentle "star me" nudge on the top row (the surface where the token
+  // odometer lives). Width-guarded: shown only when the terminal is wide
+  // enough that it doesn't crowd the animation/odometer.
+  const vlen = (s) => s.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, '').length;
+  const starStr = R.gold('★') + R.dim(' star: github.com/niztal/claudino');
+  const starLen = vlen(starStr) + 3; // includes the separating gap
+
   let right0;
   if (thinking) {
-    const reserve = (tokStr ? 26 : 0) + (model ? model.length + 3 : 0);
-    const room = cols - claude.WIDTH - 4 - reserve;
+    const base = (tokStr ? 26 : 0) + (model ? model.length + 3 : 0);
+    // Only reserve room for the star if at least 3 coins still fit after it.
+    const showStar = cols - claude.WIDTH - 4 - base - starLen >= 6;
+    const room = cols - claude.WIDTH - 4 - base - (showStar ? starLen : 0);
     const coinCount = Math.max(3, Math.min(24, Math.floor(room / 2)));
     const offset = Math.floor(Date.now() / 450); // scroll the tokens toward Claude
-    right0 = R.coinTrail(coinCount, offset) + (tokStr ? '  ' + tokStr : '') + modelStr;
+    right0 = R.coinTrail(coinCount, offset) + (tokStr ? '  ' + tokStr : '') + modelStr +
+      (showStar ? R.gray('   ') + starStr : '');
   } else {
     right0 = R.dim('z z z   Claude is napping…') + (tokStr ? R.gray('   ') + tokStr : '') + modelStr;
+    if (cols - claude.WIDTH - 2 - vlen(right0) >= starLen) right0 += R.gray('   ') + starStr;
   }
 
   const gap = '  ';
