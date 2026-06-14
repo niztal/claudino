@@ -24,6 +24,7 @@ it:
  ▐▛███▜▌   ◆ ● ● ● ● ◆ ● ● ● ● ◆ ● ● ●  ↓ 1.2k tok this session · Opus 4.8
 ▝▜█████▛▘  Context  ▓▓▓░░░░░░░ 28%
   ▘▘ ▝▝    Limit·5h ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
+           ★ Star me: https://github.com/niztal/claudino
 ```
 
 When Claude is done, it naps:
@@ -32,7 +33,13 @@ When Claude is done, it naps:
  ▐▛███▜▌   z z z   Claude is napping…   ↓ 1.2k tok this session · Opus 4.8
 ▝▜█████▛▘  Context  ▓▓▓░░░░░░░ 28%
   ▘▘ ▝▝    Limit·5h ▓▓▓▓▓▓░░░░ 62% · resets 2h 11m
+           ★ Star me: https://github.com/niztal/claudino
 ```
+
+The fourth row is a gentle **star nudge** with the repo URL. It's wrapped in an
+OSC 8 terminal hyperlink (clickable in iTerm2, VS Code, WezTerm, kitty, …), and
+because the bare URL is also shown as text, terminals that auto-linkify URLs —
+like Warp — make it clickable too.
 
 Both bars fill up as you consume them and shift green → yellow → red near the
 cap; while thinking, a gold pulse travels through the Limit bar. The Limit row
