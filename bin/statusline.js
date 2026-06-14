@@ -183,13 +183,14 @@ function render(data) {
   }
 
   const gap = '  ';
-  // A 4th line below the muncher: a clickable "star me" nudge. OSC 8 makes the
-  // text a real hyperlink in terminals that support it (iTerm2, VS Code, etc.);
-  // terminals that don't simply show the styled text. Aligned under the bars.
+  // A 4th line below the muncher: a clickable "star me" nudge. We show the bare
+  // URL as visible text so terminals that auto-linkify URLs (Warp, iTerm2,
+  // Terminal.app, VS Code, …) make it clickable, AND wrap it in an OSC 8
+  // hyperlink for terminals that honour those. Aligned under the bars.
   const STAR_URL = 'https://github.com/niztal/claudino';
   const link = (text) => '\x1b]8;;' + STAR_URL + '\x1b\\' + text + '\x1b]8;;\x1b\\';
   const starLine = ' '.repeat(claude.WIDTH + 2) +
-    link(R.gold('★') + R.dim(' Star claudino on GitHub'));
+    R.gold('★') + R.dim(' Star me: ') + link(R.blue(STAR_URL));
   return [
     art[0] + gap + right0,
     art[1] + gap + contextLine,
